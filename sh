@@ -9,17 +9,16 @@
     --disable-silent-rules \
     --libdir=\${prefix}/lib/x86_64-linux-gnu \
     --runstatedir=/run \
-    --disable-maintainer-mode \
     --disable-dependency-tracking \
     --libexecdir=/usr/lib/libvirt \
     --with-default-editor=sensible-editor \
     --disable-silent-rules \
     --disable-rpath \
+    --disable-werror \
     --with-qemu \
     --with-qemu-user=libvirt-qemu \
     --with-qemu-group=kvm \
     --with-openvz \
-    --with-avahi \
     --with-sasl \
     --with-yajl \
     --without-ssh2 \
@@ -27,8 +26,6 @@
     --with-udev \
     --with-storage-fs \
     --with-storage-dir \
-    --with-storage-lvm \
-    --with-storage-iscsi \
     --with-storage-disk \
     --without-storage-sheepdog \
     --with-storage-rbd \
@@ -50,7 +47,6 @@
     --with-macvtap \
     --with-network \
     --without-netcf \
-    --with-xen \
     --with-libxl \
     --with-vbox \
     --with-lxc \
