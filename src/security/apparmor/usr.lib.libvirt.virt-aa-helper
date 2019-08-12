@@ -3,6 +3,8 @@
 
 profile virt-aa-helper /usr/{lib,lib64}/libvirt/virt-aa-helper {
   #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
 
   # needed for searching directories
   capability dac_override,
@@ -39,6 +41,9 @@ profile virt-aa-helper /usr/{lib,lib64}/libvirt/virt-aa-helper {
   /usr/{lib,lib64}/libvirt/virt-aa-helper mr,
   /{usr/,}sbin/apparmor_parser Ux,
 
+  # for openvswitch
+  /{,var/}run/** rw,
+
   /etc/apparmor.d/libvirt/* r,
   /etc/apparmor.d/libvirt/libvirt-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]* rw,
 
@@ -53,7 +58,22 @@ profile virt-aa-helper /usr/{lib,lib64}/libvirt/virt-aa-helper {
   @{HOME}/** r,
   /var/lib/libvirt/images/ r,
   /var/lib/libvirt/images/** r,
-  /var/lib/nova/instances/_base/* r,
+  # nova base images (LP: #907269)
+  /var/lib/nova/images/** r,
+  /var/lib/nova/instances/_base/** r,
+  # nova snapshots (LP: #1244694)
+  /var/lib/nova/instances/snapshots/** r,
+  # nova base/snapshot files in snapped nova (LP: #1644507)
+  /var/snap/nova-hypervisor/common/instances/_base/** r,
+  /var/snap/nova-hypervisor/common/instances/snapshots/** r,
+  # eucalyptus (LP: #564914)
+  /var/lib/eucalyptus/instances/**/disk* r,
+  # eucalyptus loader (LP: #637544)
+  /var/lib/eucalyptus/instances/**/loader* r,
+  # for uvtool
+  /var/lib/uvtool/libvirt/images/** r,
+  # for multipass
+  /var/snap/multipass/common/data/multipassd/vault/instances/** r,
   /{media,mnt,opt,srv}/** r,
   # For virt-sandbox
   /{,var/}run/libvirt/**/[sv]d[a-z] r,
@@ -67,5 +87,6 @@ profile virt-aa-helper /usr/{lib,lib64}/libvirt/virt-aa-helper {
   /**.[iI][sS][oO] r,
   /**/disk{,.*} r,
 
+  # Site-specific additions and overrides. See local/README for details.
   #include <local/usr.lib.libvirt.virt-aa-helper>
 }

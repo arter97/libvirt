@@ -876,6 +876,8 @@ int virNetSocketNewConnectSSH(const char *nodename,
     virCommandAddEnvPassBlockSUID(cmd, "KRB5CCNAME", NULL);
     virCommandAddEnvPassBlockSUID(cmd, "SSH_AUTH_SOCK", NULL);
     virCommandAddEnvPassBlockSUID(cmd, "SSH_ASKPASS", NULL);
+    virCommandAddEnvPassBlockSUID(cmd, "GPG_TTY", NULL);
+    virCommandAddEnvPassBlockSUID(cmd, "TERM", NULL);
     virCommandAddEnvPassBlockSUID(cmd, "DISPLAY", NULL);
     virCommandAddEnvPassBlockSUID(cmd, "XAUTHORITY", NULL);
     virCommandClearCaps(cmd);

@@ -13,6 +13,10 @@
   capability setgid,
   capability setuid,
 
+  # for 9p
+  capability fsetid,
+  capability fowner,
+
   network inet stream,
   network inet6 stream,
 
@@ -34,6 +38,8 @@
   # only modify its comm value or those in its thread group.
   owner @{PROC}/@{pid}/task/@{tid}/comm rw,
   @{PROC}/sys/kernel/cap_last_cap r,
+  owner @{PROC}/*/auxv r,
+  @{PROC}/sys/vm/overcommit_memory r,
 
   # For hostdev access. The actual devices will be added dynamically
   /sys/bus/usb/devices/ r,
@@ -211,6 +217,19 @@
   unix (send, receive) type=stream addr=none peer=(label=libvirtd),
   unix (send, receive) type=stream addr=none peer=(label=/usr/sbin/libvirtd),
 
+  # allow access to charm-specific ceph config (LP: #1403648).
+  # No more silencing spurious denials as it can more critically hide other issues (LP: #1719579)
+  # Also allow the optional asok key that might be enabled by the charm (LP: #1779674)
+  /var/lib/charm/*/ceph.conf r,
+  /run/ceph/rbd-client-*.asok rw,
+
+  # kvm.powerpc executes/accesses this
+  /{usr/,}bin/uname rmix,
+  /{usr/,}sbin/ppc64_cpu rmix,
+  /{usr/,}bin/grep rmix,
+  /sys/devices/system/cpu/subcores_per_core r,
+  /sys/devices/system/cpu/cpu*/online r,
+
   # for gathering information about available host resources
   /sys/devices/system/cpu/ r,
   /sys/devices/system/node/ r,
@@ -224,6 +243,14 @@
   # for vfio hotplug on systems without static vfio (LP: #1775777)
   /dev/vfio/vfio rw,
 
+  # for vhost-net/vsock/scsi hotplug (LP: #1815910)
+  /dev/vhost-net rw,
+  /dev/vhost-vsock rw,
+  /dev/vhost-scsi rw,
+
   # required for sasl GSSAPI plugin
   /etc/gss/mech.d/ r,
   /etc/gss/mech.d/* r,
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/abstractions/libvirt-qemu>

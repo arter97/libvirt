@@ -1440,7 +1440,6 @@ if test $1 -eq 1 && test ! -f %{_sysconfdir}/libvirt/qemu/networks/default.xml ;
         -e "s,</name>,</name>\n  <uuid>$UUID</uuid>," \
          < %{_datadir}/libvirt/networks/default.xml \
          > %{_sysconfdir}/libvirt/qemu/networks/default.xml
-    ln -s ../default.xml %{_sysconfdir}/libvirt/qemu/networks/autostart/default.xml
     # libvirt saves this file with mode 0600
     chmod 0600 %{_sysconfdir}/libvirt/qemu/networks/default.xml
 
@@ -1572,7 +1571,7 @@ exit 0
 
 %{_datadir}/polkit-1/actions/org.libvirt.unix.policy
 %{_datadir}/polkit-1/actions/org.libvirt.api.policy
-%{_datadir}/polkit-1/rules.d/50-libvirt.rules
+%{_datadir}/polkit-1/rules.d/60-libvirt.rules
 
 %dir %attr(0700, root, root) %{_localstatedir}/log/libvirt/
 

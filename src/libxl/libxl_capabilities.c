@@ -532,7 +532,7 @@ libxlCapsInitGuests(libxl_ctx *ctx, virCapsPtr caps)
                                                 (guest_archs[i].pvh ? VIR_DOMAIN_OSTYPE_XENPVH :
                                                  VIR_DOMAIN_OSTYPE_XEN),
                                              guest_archs[i].arch,
-                                             LIBXL_EXECBIN_DIR "/qemu-system-i386",
+                                             "/usr/bin/qemu-system-i386",
                                              (guest_archs[i].hvm ?
                                               LIBXL_FIRMWARE_DIR "/hvmloader" :
                                               NULL),

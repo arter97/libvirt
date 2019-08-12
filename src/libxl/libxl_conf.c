@@ -2380,7 +2380,6 @@ libxlMakeVideo(virDomainDefPtr def, libxl_domain_config *d_config)
 
 {
     libxl_domain_build_info *b_info = &d_config->b_info;
-    int dm_type = libxlDomainGetEmulatorType(def);
 
     if (d_config->c_info.type != LIBXL_DOMAIN_TYPE_HVM)
         return 0;
@@ -2390,50 +2389,45 @@ libxlMakeVideo(virDomainDefPtr def, libxl_domain_config *d_config)
      * on the first graphics device (display).
      */
     if (def->nvideos) {
+        unsigned int min_vram = 8 * 1024;
+
         switch (def->videos[0]->type) {
         case VIR_DOMAIN_VIDEO_TYPE_VGA:
         case VIR_DOMAIN_VIDEO_TYPE_XEN:
             b_info->u.hvm.vga.kind = LIBXL_VGA_INTERFACE_TYPE_STD;
-            if (dm_type == LIBXL_DEVICE_MODEL_VERSION_QEMU_XEN) {
-                if (def->videos[0]->vram < 16 * 1024) {
-                    virReportError(VIR_ERR_CONFIG_UNSUPPORTED, "%s",
-                                   _("videoram must be at least 16MB for VGA"));
-                    return -1;
-                }
-            } else {
-                if (def->videos[0]->vram < 8 * 1024) {
-                    virReportError(VIR_ERR_CONFIG_UNSUPPORTED, "%s",
-                                   _("videoram must be at least 8MB for VGA"));
-                    return -1;
-                }
+            /*
+             * Libxl enforces a minimal VRAM size of 16M when using
+             * LIBXL_DEVICE_MODEL_VERSION_QEMU_XEN_TRADITIONAL or
+             * 8M for LIBXL_DEVICE_MODEL_VERSION_QEMU_XEN.
+             * Avoid build failures and go with the minimum if less
+             * is specified.
+             */
+            switch (b_info->device_model_version) {
+                case LIBXL_DEVICE_MODEL_VERSION_QEMU_XEN:
+                    min_vram = 8 * 1024;
+                    break;
+                case LIBXL_DEVICE_MODEL_VERSION_QEMU_XEN_TRADITIONAL:
+                default:
+                    min_vram = 16 * 1024;
             }
             break;
 
         case VIR_DOMAIN_VIDEO_TYPE_CIRRUS:
             b_info->u.hvm.vga.kind = LIBXL_VGA_INTERFACE_TYPE_CIRRUS;
-            if (dm_type == LIBXL_DEVICE_MODEL_VERSION_QEMU_XEN) {
-                if (def->videos[0]->vram < 8 * 1024) {
-                    virReportError(VIR_ERR_CONFIG_UNSUPPORTED, "%s",
-                                   _("videoram must be at least 8MB for CIRRUS"));
-                    return -1;
-                }
-            } else {
-                if (def->videos[0]->vram < 4 * 1024) {
-                    virReportError(VIR_ERR_CONFIG_UNSUPPORTED, "%s",
-                                   _("videoram must be at least 4MB for CIRRUS"));
-                    return -1;
-                }
+            switch (b_info->device_model_version) {
+                case LIBXL_DEVICE_MODEL_VERSION_QEMU_XEN_TRADITIONAL:
+                    min_vram = 4 * 1024; /* Actually the max, too */
+                    break;
+                case LIBXL_DEVICE_MODEL_VERSION_QEMU_XEN:
+                default:
+                    min_vram = 8 * 1024;
             }
             break;
 
 #ifdef LIBXL_HAVE_QXL
         case VIR_DOMAIN_VIDEO_TYPE_QXL:
             b_info->u.hvm.vga.kind = LIBXL_VGA_INTERFACE_TYPE_QXL;
-            if (def->videos[0]->vram < 128 * 1024) {
-                virReportError(VIR_ERR_CONFIG_UNSUPPORTED, "%s",
-                               _("videoram must be at least 128MB for QXL"));
-                return -1;
-            }
+            min_vram = 128 * 1024;
             break;
 #endif
 
@@ -2444,7 +2438,7 @@ libxlMakeVideo(virDomainDefPtr def, libxl_domain_config *d_config)
             return -1;
         }
         /* vram validated for each video type, now set it */
-        b_info->video_memkb = def->videos[0]->vram;
+        b_info->video_memkb = (def->videos[0]->vram >= min_vram) ? def->videos[0]->vram : LIBXL_MEMKB_DEFAULT;
     } else {
         libxl_defbool_set(&b_info->u.hvm.nographic, 1);
     }

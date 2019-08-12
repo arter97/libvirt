@@ -116,7 +116,7 @@ then
 fi
 
 dnl Where we look for daemons and admin binaries during configure
-LIBVIRT_SBIN_PATH="$PATH:/sbin:/usr/sbin:/usr/local/sbin"
+LIBVIRT_SBIN_PATH="/sbin:$PATH:/usr/sbin:/usr/local/sbin"
 
 dnl Checks for C compiler.
 AC_PROG_CC

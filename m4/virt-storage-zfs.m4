@@ -24,8 +24,8 @@ AC_DEFUN([LIBVIRT_STORAGE_ARG_ZFS], [
 AC_DEFUN([LIBVIRT_STORAGE_CHECK_ZFS], [
   if test "$with_storage_zfs" = "yes" ||
      test "$with_storage_zfs" = "check"; then
-    AC_PATH_PROG([ZFS], [zfs], [], [$LIBVIRT_SBIN_PATH])
-    AC_PATH_PROG([ZPOOL], [zpool], [], [$LIBVIRT_SBIN_PATH])
+    AC_PATH_PROG([ZFS], [zfs], [/sbin/zfs], [$LIBVIRT_SBIN_PATH])
+    AC_PATH_PROG([ZPOOL], [zpool], [/sbin/zpool], [$LIBVIRT_SBIN_PATH])
 
     if test "$with_storage_zfs" = "yes"; then
       if test -z "$ZFS" || test -z "$ZPOOL"; then
